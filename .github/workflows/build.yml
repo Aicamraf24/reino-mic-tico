@@ -8,10 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Descomprimir si hace falta
+      - name: Descomprimir el ZIP si el proyecto está comprimido
         run: |
-          if [ -f Reino_Micotico.zip ] && [ -z "$(find . -name settings.gradle | head -n1)" ]; then
-            unzip -q Reino_Micotico.zip -d proyecto
+          if [ -z "$(find . -name settings.gradle | head -n1)" ]; then
+            find . -maxdepth 1 -name "*.zip" -print0 | while IFS= read -r -d '' z; do
+              echo "Descomprimiendo: $z"
+              unzip -q -o "$z" -d proyecto
+            done
           fi
       - uses: actions/setup-java@v4
         with:
