@@ -12,13 +12,19 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
-      # No hace falta el wrapper: se usa Gradle 9.4.1 directamente
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 9.4.1
+      - name: Localizar el proyecto
+        id: loc
+        run: |
+          f=$(find . -name settings.gradle -not -path "*/node_modules/*" | head -n1)
+          if [ -z "$f" ]; then echo "No se encontró settings.gradle en el repositorio"; ls -R | head -50; exit 1; fi
+          echo "dir=$(dirname "$f")" >> "$GITHUB_OUTPUT"
       - name: Compilar
+        working-directory: ${{ steps.loc.outputs.dir }}
         run: gradle build --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: reino_micotico-jar
-          path: build/libs/*.jar
+          path: ${{ steps.loc.outputs.dir }}/build/libs/*.jar
