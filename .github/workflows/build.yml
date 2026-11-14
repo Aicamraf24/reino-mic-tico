@@ -8,6 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Descomprimir si hace falta
+        run: |
+          if [ -f Reino_Micotico.zip ] && [ -z "$(find . -name settings.gradle | head -n1)" ]; then
+            unzip -q Reino_Micotico.zip -d proyecto
+          fi
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -18,8 +23,8 @@ jobs:
       - name: Localizar el proyecto
         id: loc
         run: |
-          f=$(find . -name settings.gradle -not -path "*/node_modules/*" | head -n1)
-          if [ -z "$f" ]; then echo "No se encontró settings.gradle en el repositorio"; ls -R | head -50; exit 1; fi
+          f=$(find . -name settings.gradle | head -n1)
+          if [ -z "$f" ]; then echo "No se encontró settings.gradle"; ls -R | head -50; exit 1; fi
           echo "dir=$(dirname "$f")" >> "$GITHUB_OUTPUT"
       - name: Compilar
         working-directory: ${{ steps.loc.outputs.dir }}
